@@ -1,4 +1,4 @@
-import {useState} from 'react'
+import {useState, useRef, useEffect} from 'react'
 import confetti from 'canvas-confetti'
 import './App.css'
 
@@ -12,6 +12,120 @@ function App() {
     const [useNumbers, setUseNumbers] = useState(false)
     const [hintLetters, setHintLetters] = useState(true)
     const [wrongKey, setWrongKey] = useState('')
+
+    const canvasRef = useRef(null)
+    const peopleRef = useRef([])
+    const colors = ['#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6','#1abc9c','#e67e22','#ff6b81']
+
+    function spawnPerson(ch) {
+        const cvs = canvasRef.current
+        if (!cvs) return
+        const rect = cvs.getBoundingClientRect()
+        const btn = document.querySelector(`#keyboard button[data-key="${ch}"]`)
+        let sx = cvs.width / 2
+        let sy = 0
+        if (btn) {
+            const br = btn.getBoundingClientRect()
+            sx = br.left + br.width / 2 - rect.left
+            sy = br.top - rect.top
+        }
+        peopleRef.current.push({
+            x: sx,
+            y: sy,
+            targetY: cvs.height - 20,
+            dir: Math.random() < 0.5 ? 1 : -1,
+            speed: 0.5 + Math.random() * 0.5,
+            frame: 0,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            dropping: true
+        })
+    }
+
+    useEffect(() => {
+        const cvs = canvasRef.current
+        if (!cvs) return
+        const ctx = cvs.getContext('2d')
+        let animId
+
+        function resize() {
+            const parent = cvs.parentElement
+            cvs.width = parent.clientWidth
+            cvs.height = parent.clientHeight
+        }
+        resize()
+        window.addEventListener('resize', resize)
+
+        function drawPerson(p) {
+            const s = p.dir
+            const legSwing = Math.sin(p.frame * 0.15) * 8
+            ctx.strokeStyle = p.color
+            ctx.lineWidth = 2.5
+            ctx.lineCap = 'round'
+
+            // head
+            ctx.beginPath()
+            ctx.arc(p.x, p.y - 24, 7, 0, Math.PI * 2)
+            ctx.stroke()
+            ctx.fillStyle = p.color
+            ctx.fill()
+
+            // body
+            ctx.beginPath()
+            ctx.moveTo(p.x, p.y - 17)
+            ctx.lineTo(p.x, p.y - 2)
+            ctx.stroke()
+
+            // left leg
+            ctx.beginPath()
+            ctx.moveTo(p.x, p.y - 2)
+            ctx.lineTo(p.x - 6 - legSwing * s, p.y + 10)
+            ctx.stroke()
+
+            // right leg
+            ctx.beginPath()
+            ctx.moveTo(p.x, p.y - 2)
+            ctx.lineTo(p.x + 6 + legSwing * s, p.y + 10)
+            ctx.stroke()
+
+            // arms
+            ctx.beginPath()
+            ctx.moveTo(p.x, p.y - 14)
+            ctx.lineTo(p.x - 8 + legSwing * s * 0.5, p.y - 6)
+            ctx.moveTo(p.x, p.y - 14)
+            ctx.lineTo(p.x + 8 - legSwing * s * 0.5, p.y - 6)
+            ctx.stroke()
+        }
+
+        function tick() {
+            ctx.clearRect(0, 0, cvs.width, cvs.height)
+            const people = peopleRef.current
+            for (let i = people.length - 1; i >= 0; i--) {
+                const p = people[i]
+                if (p.dropping) {
+                    p.y += 4
+                    if (p.y >= p.targetY) {
+                        p.y = p.targetY
+                        p.dropping = false
+                    }
+                } else {
+                    p.x += p.dir * p.speed
+                    p.frame++
+                }
+                if (p.x < -30 || p.x > cvs.width + 30) {
+                    people.splice(i, 1)
+                    continue
+                }
+                drawPerson(p)
+            }
+            animId = requestAnimationFrame(tick)
+        }
+        tick()
+
+        return () => {
+            cancelAnimationFrame(animId)
+            window.removeEventListener('resize', resize)
+        }
+    }, [])
 
     function newLetter() {
         const pool = useNumbers
@@ -27,6 +141,7 @@ function App() {
             newLetter()
             setFailed(false)
             setWrongKey('')
+            spawnPerson(letter)
             confetti({particleCount: 100, spread: 70, origin: {y: 0.6}})
         } else {
             setFailed(true)
@@ -57,7 +172,7 @@ function App() {
             <section id="typed">
                 <div style={{fontSize: '20px', fontWeight: 'bold', color: failed ? 'red' : 'black'}}>{typedLetter}</div>
             </section>
-            <section id="keyboard">
+            <section id="keyboard" style={{position: 'relative'}}>
                 <div style={{
                     display: 'flex',
                     flexDirection: 'column',
@@ -69,7 +184,7 @@ function App() {
                     <div style={{display: 'flex', gap: '6px'}}>
                         <div style={{width: '56px'}} />
                         {['1','2','3','4','5','6','7','8','9','0'].map(key => (
-                            <button key={key} style={{
+                            <button key={key} data-key={key} style={{
                                 width: '50px', height: '50px', fontSize: '20px', fontWeight: 'bold',
                                 border: '2px solid var(--border)', borderRadius: '8px',
                                 background: key === letter ? 'var(--accent-bg)' : key === wrongKey ? '#ff000020' : 'var(--bg)',
@@ -97,7 +212,7 @@ function App() {
                             Tab
                         </button>
                         {['Q','W','E','R','T','Y','U','I','O','P'].map(key => (
-                            <button key={key} style={{
+                            <button key={key} data-key={key} style={{
                                 width: '50px', height: '50px', fontSize: '20px', fontWeight: 'bold',
                                 border: '2px solid var(--border)', borderRadius: '8px',
                                 background: key === letter ? 'var(--accent-bg)' : key === wrongKey ? '#ff000020' : 'var(--bg)',
@@ -118,7 +233,7 @@ function App() {
                             Caps
                         </button>
                         {['A','S','D','F','G','H','J','K','L'].map(key => (
-                            <button key={key} style={{
+                            <button key={key} data-key={key} style={{
                                 width: '50px', height: '50px', fontSize: '20px', fontWeight: 'bold',
                                 border: '2px solid var(--border)', borderRadius: '8px',
                                 background: key === letter ? 'var(--accent-bg)' : key === wrongKey ? '#ff000020' : 'var(--bg)',
@@ -146,7 +261,7 @@ function App() {
                             Shift
                         </button>
                         {['Z','X','C','V','B','N','M'].map(key => (
-                            <button key={key} style={{
+                            <button key={key} data-key={key} style={{
                                 width: '50px', height: '50px', fontSize: '20px', fontWeight: 'bold',
                                 border: '2px solid var(--border)', borderRadius: '8px',
                                 background: key === letter ? 'var(--accent-bg)' : key === wrongKey ? '#ff000020' : 'var(--bg)',
@@ -203,6 +318,10 @@ function App() {
                         </button>
                     </div>
                 </div>
+                <canvas ref={canvasRef} style={{
+                    position: 'absolute', inset: 0, width: '100%', height: '100%',
+                    pointerEvents: 'none', zIndex: 1
+                }} />
             </section>
             <section id="control">
                 <div>
