@@ -12,28 +12,78 @@ function App() {
     const [useNumbers, setUseNumbers] = useState(false)
     const [hintLetters, setHintLetters] = useState(true)
     const [wrongKey, setWrongKey] = useState('')
+    const [lowercase, setLowercase] = useState(false)
 
     const canvasRef = useRef(null)
     const peopleRef = useRef([])
+    const letterShownAtRef = useRef(null)
+    letterShownAtRef.current ??= Date.now()
     const colors = ['#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6','#1abc9c','#e67e22','#ff6b81']
 
     const srRef = useRef(null)
 
+    function loadCookie() {
+        try {
+            const match = document.cookie.match(/(?:^| )typer_sr=([^;]*)/)
+            if (match) return JSON.parse(decodeURIComponent(match[1]))
+        } catch { /* ignore */ }
+        return null
+    }
+
+    const [unlockedCount, setUnlockedCount] = useState(() => {
+        const data = loadCookie()
+        return data?.unlockedCount ?? 4
+    })
+
+    function saveCookie() {
+        const data = { cards: srRef.current, unlockedCount }
+        document.cookie = 'typer_sr=' + encodeURIComponent(JSON.stringify(data)) + ';max-age=2592000;path=/'
+    }
+
     useEffect(() => {
-        const all = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-        srRef.current = Object.fromEntries(
-            all.split('').map(ch => [ch, { ease: 2.5, interval: 0, nextDue: 0 }])
-        )
+        const data = loadCookie()
+        if (data?.cards) {
+            srRef.current = data.cards
+        } else {
+            const all = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+            srRef.current = Object.fromEntries(
+                all.split('').map(ch => [ch, { ease: 2.5, interval: 0, nextDue: 0 }])
+            )
+        }
+        const d = { cards: srRef.current, unlockedCount }
+        document.cookie = 'typer_sr=' + encodeURIComponent(JSON.stringify(d)) + ';max-age=2592000;path=/'
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
+
+    useEffect(() => {
+        if (!srRef.current) return
+        const d = { cards: srRef.current, unlockedCount }
+        document.cookie = 'typer_sr=' + encodeURIComponent(JSON.stringify(d)) + ';max-age=2592000;path=/'
+         
+    }, [unlockedCount])
+
+    const allLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    const unlocked = allLetters.slice(0, unlockedCount).split('')
+
+    function tryUnlock() {
+        const mastered = unlocked.every(ch => srRef.current[ch] && srRef.current[ch].interval >= 3)
+        if (mastered && unlockedCount < 26) {
+            const next = unlockedCount + 4
+            setUnlockedCount(Math.min(next, 26))
+        }
+    }
 
     function pickNext() {
         const pool = srRef.current
         if (!pool) return 'A'
+        const candidates = unlocked.slice()
+        if (useNumbers) {
+            for (let i = 0; i <= 9; i++) candidates.push(String(i))
+        }
         let best = null
         let bestTime = Infinity
-        for (const ch in pool) {
-            if (!useNumbers && ch >= '0' && ch <= '9') continue
-            const due = pool[ch].nextDue
+        for (const ch of candidates) {
+            const due = pool[ch]?.nextDue ?? 0
             if (due < bestTime) {
                 bestTime = due
                 best = ch
@@ -45,13 +95,20 @@ function App() {
     function srCorrect(ch) {
         const card = srRef.current[ch]
         if (!card) return
-        if (card.interval === 0) {
+        const elapsed = Date.now() - letterShownAtRef.current
+        if (elapsed > 5000) {
+            card.interval = 0
+            card.ease = Math.max(1.3, card.ease - 0.1)
+        } else if (card.interval === 0) {
             card.interval = 1
         } else {
             card.interval = Math.round(card.interval * card.ease)
+            card.ease = Math.min(3.5, card.ease + 0.1)
         }
-        card.ease = Math.min(3.5, card.ease + 0.1)
         card.nextDue = Date.now() + card.interval * 2000
+        tryUnlock()
+        const d = { cards: srRef.current, unlockedCount }
+        document.cookie = 'typer_sr=' + encodeURIComponent(JSON.stringify(d)) + ';max-age=2592000;path=/'
     }
 
     function srWrong(ch) {
@@ -60,6 +117,7 @@ function App() {
         card.interval = 0
         card.ease = Math.max(1.3, card.ease - 0.2)
         card.nextDue = Date.now()
+        saveCookie()
     }
 
     function spawnPerson(ch) {
@@ -75,8 +133,7 @@ function App() {
             sy = br.top - rect.top
         }
         peopleRef.current.push({
-            x: sx,
-            y: sy,
+            x: sx, y: sy, ch,
             targetY: cvs.height - 20,
             dir: Math.random() < 0.5 ? 1 : -1,
             speed: 0.5 + Math.random() * 0.5,
@@ -107,12 +164,12 @@ function App() {
             ctx.lineWidth = 2.5
             ctx.lineCap = 'round'
 
-            // head
-            ctx.beginPath()
-            ctx.arc(p.x, p.y - 24, 7, 0, Math.PI * 2)
-            ctx.stroke()
+            // head (letter)
+            ctx.font = 'bold 16px sans-serif'
+            ctx.textAlign = 'center'
+            ctx.textBaseline = 'middle'
             ctx.fillStyle = p.color
-            ctx.fill()
+            ctx.fillText(p.ch, p.x, p.y - 22)
 
             // body
             ctx.beginPath()
@@ -156,9 +213,8 @@ function App() {
                     p.x += p.dir * p.speed
                     p.frame++
                 }
-                if (p.x < -30 || p.x > cvs.width + 30) {
-                    people.splice(i, 1)
-                    continue
+                if (p.x < 10 || p.x > cvs.width - 10) {
+                    p.dir *= -1
                 }
                 drawPerson(p)
             }
@@ -173,6 +229,7 @@ function App() {
     }, [])
 
     function newLetter() {
+        letterShownAtRef.current = Date.now()
         setLetter(pickNext())
     }
 
@@ -235,7 +292,7 @@ function App() {
                                 cursor: 'pointer', transition: 'all 0.2s',
                                 borderColor: key === letter ? 'var(--accent-border)' : key === wrongKey ? 'red' : 'var(--border)'
                             }} onClick={() => { setTypedLetter(key); checkLetter(key) }}>
-                                {key}
+                                {lowercase && key >= 'A' && key <= 'Z' ? key.toLowerCase() : key}
                             </button>
                         ))}
                         <button style={{
@@ -263,7 +320,7 @@ function App() {
                                 cursor: 'pointer', transition: 'all 0.2s',
                                 borderColor: key === letter ? 'var(--accent-border)' : key === wrongKey ? 'red' : 'var(--border)'
                             }} onClick={() => { setTypedLetter(key); checkLetter(key) }}>
-                                {key}
+                                {lowercase && key >= 'A' && key <= 'Z' ? key.toLowerCase() : key}
                             </button>
                         ))}
                     </div>
@@ -284,7 +341,7 @@ function App() {
                                 cursor: 'pointer', transition: 'all 0.2s',
                                 borderColor: key === letter ? 'var(--accent-border)' : key === wrongKey ? 'red' : 'var(--border)'
                             }} onClick={() => { setTypedLetter(key); checkLetter(key) }}>
-                                {key}
+                                {lowercase && key >= 'A' && key <= 'Z' ? key.toLowerCase() : key}
                             </button>
                         ))}
                         <button style={{
@@ -312,7 +369,7 @@ function App() {
                                 cursor: 'pointer', transition: 'all 0.2s',
                                 borderColor: key === letter ? 'var(--accent-border)' : key === wrongKey ? 'red' : 'var(--border)'
                             }} onClick={() => { setTypedLetter(key); checkLetter(key) }}>
-                                {key}
+                                {lowercase && key >= 'A' && key <= 'Z' ? key.toLowerCase() : key}
                             </button>
                         ))}
                         <button style={{
@@ -375,6 +432,10 @@ function App() {
                     <label>
                         <input type="checkbox" checked={hintLetters} onChange={() => setHintLetters(!hintLetters)}/>
                         Hint Letters
+                    </label>
+                    <label>
+                        <input type="checkbox" checked={lowercase} onChange={() => setLowercase(!lowercase)}/>
+                        Lowercase
                     </label>
                 </div>
             </section>
