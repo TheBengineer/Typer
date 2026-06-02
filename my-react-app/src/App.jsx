@@ -17,6 +17,51 @@ function App() {
     const peopleRef = useRef([])
     const colors = ['#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6','#1abc9c','#e67e22','#ff6b81']
 
+    const srRef = useRef(null)
+
+    useEffect(() => {
+        const all = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+        srRef.current = Object.fromEntries(
+            all.split('').map(ch => [ch, { ease: 2.5, interval: 0, nextDue: 0 }])
+        )
+    }, [])
+
+    function pickNext() {
+        const pool = srRef.current
+        if (!pool) return 'A'
+        let best = null
+        let bestTime = Infinity
+        for (const ch in pool) {
+            if (!useNumbers && ch >= '0' && ch <= '9') continue
+            const due = pool[ch].nextDue
+            if (due < bestTime) {
+                bestTime = due
+                best = ch
+            }
+        }
+        return best || 'A'
+    }
+
+    function srCorrect(ch) {
+        const card = srRef.current[ch]
+        if (!card) return
+        if (card.interval === 0) {
+            card.interval = 1
+        } else {
+            card.interval = Math.round(card.interval * card.ease)
+        }
+        card.ease = Math.min(3.5, card.ease + 0.1)
+        card.nextDue = Date.now() + card.interval * 2000
+    }
+
+    function srWrong(ch) {
+        const card = srRef.current[ch]
+        if (!card) return
+        card.interval = 0
+        card.ease = Math.max(1.3, card.ease - 0.2)
+        card.nextDue = Date.now()
+    }
+
     function spawnPerson(ch) {
         const cvs = canvasRef.current
         if (!cvs) return
@@ -128,15 +173,12 @@ function App() {
     }, [])
 
     function newLetter() {
-        const pool = useNumbers
-            ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-            : 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-        const ch = pool[Math.floor(Math.random() * pool.length)]
-        setLetter(ch)
+        setLetter(pickNext())
     }
 
     function checkLetter(typedLetter) {
         if (typedLetter === letter) {
+            srCorrect(letter)
             setCount(count + 1)
             newLetter()
             setFailed(false)
@@ -144,6 +186,7 @@ function App() {
             spawnPerson(letter)
             confetti({particleCount: 100, spread: 70, origin: {y: 0.6}})
         } else {
+            srWrong(letter)
             setFailed(true)
             setWrongKey(typedLetter)
         }
