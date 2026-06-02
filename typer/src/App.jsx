@@ -66,15 +66,16 @@ function App() {
     const unlocked = allLetters.slice(0, unlockedCount).split('')
 
     function tryUnlock() {
-        const mastered = unlocked.every(ch => srRef.current[ch] && srRef.current[ch].interval >= 3)
+        const mastered = unlocked.every(ch => srRef.current[ch] && srRef.current[ch].interval >= 1)
         if (mastered && unlockedCount < 26) {
-            const next = unlockedCount + 4
+            const next = unlockedCount + 6
             setUnlockedCount(Math.min(next, 26))
         }
     }
 
     function pickNext() {
         const pool = srRef.current
+        console.log(pool);
         if (!pool) return 'A'
         const candidates = unlocked.slice()
         if (useNumbers) {
