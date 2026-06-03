@@ -440,6 +440,21 @@ function App() {
                     </label>
                 </div>
             </section>
+            <section id="stats">
+                <div>
+                    <div>
+                        <span>Score </span>
+                        <span>{count}</span>
+                    </div>
+                </div>
+            </section>
+            <section id="footer">
+                <div>
+                    <a href="https://github.com/thebengineer/typer" target="_blank" rel="noopener noreferrer">GitHub</a>
+                    <br/>
+                    <a href="https://thebengineer.net" target="_blank" rel="noopener noreferrer">TheBengineer.net</a>
+                </div>
+            </section>
         </div>
     )
 }
