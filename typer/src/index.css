@@ -109,3 +109,12 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+#footer div {
+  display: flex;
+}
+
+#footer a {
+  padding: 0 20px;
+}
+

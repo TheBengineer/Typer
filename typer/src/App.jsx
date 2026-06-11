@@ -296,11 +296,11 @@ function App() {
                     fontWeight: 'bold',
                     color: failed ? 'red' : 'black',
                     height: '120px',
-                    marginTop: '40px'
+                    alignContent: "center"
                 }}>{letter}</div>
             </section>
             <section id="typed">
-                <div style={{fontSize: '20px', fontWeight: 'bold', color: failed ? 'red' : 'black'}}>{typedLetter}</div>
+                <div style={{fontSize: '20px',alignContent: "center", fontWeight: 'bold', color: failed ? 'red' : 'black'}}>{typedLetter}</div>
             </section>
             <section id="keyboard" style={{position: 'relative'}}>
                 <div style={{
@@ -308,7 +308,6 @@ function App() {
                     flexDirection: 'column',
                     alignItems: 'center',
                     gap: '6px',
-                    margin: '40px auto',
                     padding: '20px'
                 }}>
                     <div style={{display: 'flex', gap: '6px'}}>
@@ -476,10 +475,6 @@ function App() {
             </section>
             <section id="stats">
                 <div>
-                    <div>
-                        <span>Score </span>
-                        <span>{count}</span>
-                    </div>
                     <ScoreGrid count={count} />
                 </div>
             </section>
