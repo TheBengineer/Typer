@@ -1,8 +1,12 @@
 {
   "name": "typer",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
+  "description": "A typing practice game built with React and Vite.",
+  "license": "ISC",
+  "author": "",
   "type": "module",
+  "main": "eslint.config.js",
   "scripts": {
     "dev": "vite --host",
     "build": "vite build",
@@ -23,6 +27,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
-    "vite": "^8.0.12"
+    "playwright": "^1.60.0",
+    "vite": "^8.0.16"
   }
 }

@@ -4,16 +4,26 @@ import './App.css'
 import ScoreGrid from './ScoreGrid.jsx'
 
 function App() {
-    const [count, setCount] = useState(0)
+    const [count, setCount] = useState(() => {
+        const data = loadCookie()
+        return data?.score ?? 0
+    })
 
     const [letter, setLetter] = useState('A')
     const [typedLetter, setTypedLetter] = useState('')
     const [failed, setFailed] = useState(false)
 
-    const [useNumbers, setUseNumbers] = useState(false)
-    const [hintLetters, setHintLetters] = useState(true)
+    const [useNumbers, setUseNumbers] = useState(() => {
+        const data = loadCookie(); return data?.useNumbers ?? false
+    })
+    const [hintLetters, setHintLetters] = useState(() => {
+        const data = loadCookie(); return data?.hintLetters ?? true
+    })
     const [wrongKey, setWrongKey] = useState('')
-    const [lowercase, setLowercase] = useState(false)
+    const [lowercase, setLowercase] = useState(() => {
+        const data = loadCookie(); return data?.lowercase ?? false
+    })
+    const [showConfig, setShowConfig] = useState(false)
 
     const canvasRef = useRef(null)
     const peopleRef = useRef([])
@@ -37,7 +47,7 @@ function App() {
     })
 
     function saveCookie() {
-        const data = { cards: srRef.current, unlockedCount }
+        const data = { cards: srRef.current, unlockedCount, score: count, useNumbers, hintLetters, lowercase }
         document.cookie = 'typer_sr=' + encodeURIComponent(JSON.stringify(data)) + ';max-age=2592000;path=/'
     }
 
@@ -51,17 +61,27 @@ function App() {
                 all.split('').map(ch => [ch, { ease: 2.5, interval: 0, nextDue: 0 }])
             )
         }
-        const d = { cards: srRef.current, unlockedCount }
+        const d = { cards: srRef.current, unlockedCount, score: count }
         document.cookie = 'typer_sr=' + encodeURIComponent(JSON.stringify(d)) + ';max-age=2592000;path=/'
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useEffect(() => {
         if (!srRef.current) return
-        const d = { cards: srRef.current, unlockedCount }
+        const d = { cards: srRef.current, unlockedCount, score: count }
         document.cookie = 'typer_sr=' + encodeURIComponent(JSON.stringify(d)) + ';max-age=2592000;path=/'
-         
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [unlockedCount])
+
+    useEffect(() => {
+        if (srRef.current) saveCookie()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [count])
+
+    useEffect(() => {
+        if (srRef.current) saveCookie()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [useNumbers, hintLetters, lowercase])
 
     const allLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
     const unlocked = allLetters.slice(0, unlockedCount).split('')
@@ -109,8 +129,7 @@ function App() {
         }
         card.nextDue = Date.now() + card.interval * 2000
         tryUnlock()
-        const d = { cards: srRef.current, unlockedCount }
-        document.cookie = 'typer_sr=' + encodeURIComponent(JSON.stringify(d)) + ';max-age=2592000;path=/'
+        saveCookie()
     }
 
     function srWrong(ch) {
@@ -256,6 +275,15 @@ function App() {
         setTypedLetter(key)
         checkLetter(key)
     }
+
+    useEffect(() => {
+        window.setScore = (n) => {
+            const num = parseInt(n, 10)
+            if (!isNaN(num) && num >= 0) setCount(num)
+        }
+        console.log('Debug: window.setScore(n) available — type setScore(42) to jump')
+        return () => { delete window.setScore }
+    }, [])
 
     return (
         <div onKeyDown={handleKeyDown} tabIndex={0} style={{outline: 'none'}}>
@@ -425,21 +453,26 @@ function App() {
                     pointerEvents: 'none', zIndex: 1
                 }} />
             </section>
-            <section id="control">
-                <div>
-                    <label>
-                        <input type="checkbox" checked={useNumbers} onChange={() => setUseNumbers(!useNumbers)}/>
-                        Use Numbers
-                    </label>
-                    <label>
-                        <input type="checkbox" checked={hintLetters} onChange={() => setHintLetters(!hintLetters)}/>
-                        Hint Letters
-                    </label>
-                    <label>
-                        <input type="checkbox" checked={lowercase} onChange={() => setLowercase(!lowercase)}/>
-                        Lowercase
-                    </label>
-                </div>
+            <section id="config">
+                <button className="config-toggle" onClick={() => setShowConfig(!showConfig)}>
+                    {showConfig ? '▲' : '⚙'} Settings
+                </button>
+                {showConfig && (
+                    <div className="config-panel">
+                        <label className="config-label">
+                            <input type="checkbox" checked={useNumbers} onChange={() => setUseNumbers(!useNumbers)}/>
+                            Numbers
+                        </label>
+                        <label className="config-label">
+                            <input type="checkbox" checked={hintLetters} onChange={() => setHintLetters(!hintLetters)}/>
+                            Letter Hints
+                        </label>
+                        <label className="config-label">
+                            <input type="checkbox" checked={lowercase} onChange={() => setLowercase(!lowercase)}/>
+                            Lowercase Letters
+                        </label>
+                    </div>
+                )}
             </section>
             <section id="stats">
                 <div>
