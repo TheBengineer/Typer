@@ -1,6 +1,7 @@
 import {useState, useRef, useEffect} from 'react'
 import confetti from 'canvas-confetti'
 import './App.css'
+import ScoreGrid from './ScoreGrid.jsx'
 
 function App() {
     const [count, setCount] = useState(0)
@@ -446,6 +447,7 @@ function App() {
                         <span>Score </span>
                         <span>{count}</span>
                     </div>
+                    <ScoreGrid count={count} />
                 </div>
             </section>
             <section id="footer">
