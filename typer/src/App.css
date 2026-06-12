@@ -603,6 +603,16 @@
     }
 }
 
+.game-container:focus {
+    outline: 3px solid var(--accent);
+    outline-offset: -3px;
+    border-radius: 4px;
+}
+
+.game-container:focus:not(:focus-visible) {
+    outline: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .sg-pv-dot--new {
         animation: none;

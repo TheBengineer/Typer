@@ -276,7 +276,7 @@ function TypingGame({count, setCount, letter, setLetter, typedLetter, setTypedLe
     }, [])
 
     return (
-        <div onKeyDown={handleKeyDown} tabIndex={0} style={{outline: 'none'}}>
+        <div onKeyDown={handleKeyDown} tabIndex={0} className="game-container">
             <section id="center">
                 <div style={{
                     fontSize: '120px',

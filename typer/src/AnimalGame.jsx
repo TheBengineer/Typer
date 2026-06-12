@@ -391,7 +391,7 @@ function AnimalGame() {
     })
 
     return (
-        <div onKeyDown={handleKeyDown} tabIndex={0} style={{outline: 'none'}}>
+        <div onKeyDown={handleKeyDown} tabIndex={0} className="game-container">
             <div className="animal-game">
                 {/* Image */}
                 {!loaded ? (
