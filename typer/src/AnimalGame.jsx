@@ -100,6 +100,7 @@ function AnimalGame() {
             return
         }
         const img = new Image()
+        img.crossOrigin = 'anonymous'
         img.onload = () => {
             imageCacheRef.current[currentAnimal.url] = img
             setLoaded(true)
@@ -184,6 +185,7 @@ function AnimalGame() {
         if (imageCacheRef.current[url]) return imageCacheRef.current[url]
         const img = new Image()
         img.crossOrigin = 'anonymous'
+        img.onload = () => { imageCacheRef.current[url] = img }
         img.src = url
         imageCacheRef.current[url] = img
         return img
@@ -194,7 +196,7 @@ function AnimalGame() {
         if (!cvs) return
         const sx = cvs.width / 2
         const sy = 0
-        const img = preloadImage(animal.url)
+        const img = imageCacheRef.current[animal.url] || preloadImage(animal.url)
         walkingAnimalsRef.current.push({
             animal: animal.name,
             x: sx - 25,
