@@ -82,6 +82,18 @@ function App() {
                     <br/>
                     <a href="https://thebengineer.net" target="_blank" rel="noopener noreferrer">TheBengineer.net</a>
                 </div>
+                <div style={{
+                    marginTop: '8px',
+                    fontSize: '11px',
+                    opacity: 0.4
+                }}>
+                    <a href={`https://github.com/thebengineer/typer/commit/${__COMMIT_HASH__}`}
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       style={{color: 'inherit', textDecoration: 'none'}}>
+                        {__COMMIT_HASH__}
+                    </a>
+                </div>
             </section>
         </>
     )
