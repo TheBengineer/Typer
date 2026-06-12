@@ -170,7 +170,6 @@ function AnimalGame() {
         img.src = currentAnimal.url
     }, [currentAnimal])
 
-    // Canvas animation loop
     useEffect(() => {
         const cvs = canvasRef.current
         if (!cvs) return
@@ -213,7 +212,6 @@ function AnimalGame() {
                     p.dir *= -1
                 }
 
-                // Scale-up pop effect (300ms easeOutCubic)
                 let scale = 1
                 if (p.spawnTime) {
                     const elapsed = performance.now() - p.spawnTime
@@ -223,7 +221,6 @@ function AnimalGame() {
                     }
                 }
 
-                // Draw animal image
                 if (p.img) {
                     ctx.save()
                     ctx.globalAlpha = p.alpha
@@ -240,10 +237,9 @@ function AnimalGame() {
                     }
                     ctx.restore()
                     const legSwing = Math.sin(p.frame * 0.15) * 8
-                    const legColor = p.color
                     ctx.save()
                     ctx.globalAlpha = p.alpha
-                    ctx.strokeStyle = legColor
+                    ctx.strokeStyle = p.color
                     ctx.lineWidth = Math.max(2, 2.5 * scale)
                     ctx.lineCap = 'round'
                     const legTop = p.y + 38 * scale - oy
@@ -275,7 +271,7 @@ function AnimalGame() {
             cancelAnimationFrame(animId)
             window.removeEventListener('resize', resize)
         }
-    }, [])
+    }, [currentAnimal])
 
     function preloadImage(url) {
         if (imageCacheRef.current[url]) return imageCacheRef.current[url]
@@ -286,6 +282,7 @@ function AnimalGame() {
     }
 
     function spawnWalkingAnimal(animal) {
+        console.log("Spawning Animal")
         const cvs = canvasRef.current
         if (!cvs) return
         const rect = cvs.getBoundingClientRect()
