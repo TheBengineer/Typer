@@ -511,7 +511,7 @@
 .sg-pv-tens {
     display: grid;
     grid-template-columns: repeat(10, 1fr);
-    gap: 1.5px;
+    gap: 4px 0;
     width: fit-content;
     transition: box-shadow 0.3s;
 }
