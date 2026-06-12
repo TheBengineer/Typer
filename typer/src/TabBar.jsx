@@ -1,11 +1,13 @@
 function TabBar({tabs, activeTab, onTabChange}) {
     return (
-        <div className="tab-bar">
+        <div className="tab-bar" role="tablist">
             {tabs.map(tab => (
                 <button
                     key={tab.id}
                     className={'tab-btn' + (tab.id === activeTab ? ' tab-btn--active' : '')}
                     data-tab={tab.id}
+                    role="tab"
+                    aria-selected={tab.id === activeTab}
                     onClick={() => onTabChange(tab.id)}
                 >
                     {tab.label}

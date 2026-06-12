@@ -86,7 +86,7 @@ function TypingGame({count, setCount, letter, setLetter, typedLetter, setTypedLe
 
     function pickNext() {
         const pool = srRef.current
-        console.log(pool);
+        if (import.meta.env.DEV) console.log(pool);
         if (!pool) return 'A'
         const candidates = unlocked.slice()
         if (useNumbers) {
@@ -271,7 +271,7 @@ function TypingGame({count, setCount, letter, setLetter, typedLetter, setTypedLe
             const num = parseInt(n, 10)
             if (!isNaN(num) && num >= 0) setCount(num)
         }
-        console.log('Debug: window.setScore(n) available — type setScore(42) to jump')
+        if (import.meta.env.DEV) console.log('Debug: window.setScore(n) available — type setScore(42) to jump')
         return () => { delete window.setScore }
     }, [])
 
