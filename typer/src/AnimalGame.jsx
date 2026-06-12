@@ -193,8 +193,17 @@ function AnimalGame() {
             const walkers = walkingAnimalsRef.current
             for (let i = walkers.length - 1; i >= 0; i--) {
                 const p = walkers[i]
-                if (p.dropping) {
+
+                if (p.exiting) {
+                    p.alpha -= 0.02
+                    p.x += p.exitDir * 2
+                    if (p.alpha <= 0) {
+                        walkers.splice(i, 1)
+                        continue
+                    }
+                } else if (p.dropping) {
                     p.y += 4
+                    p.x += (p.landX - p.x) * 0.05
                     if (p.y >= p.targetY) {
                         p.y = p.targetY
                         p.dropping = false
@@ -203,29 +212,44 @@ function AnimalGame() {
                     p.x += p.dir * p.speed
                     p.frame++
                 }
-                if (p.x < 10 || p.x > cvs.width - 10) {
+
+                if (!p.exiting && (p.x < 10 || p.x > cvs.width - 10)) {
                     p.dir *= -1
                 }
+
+                // Scale-up pop effect (300ms easeOutCubic)
+                let scale = 1
+                if (p.spawnTime) {
+                    const elapsed = performance.now() - p.spawnTime
+                    if (elapsed < 300) {
+                        const t = elapsed / 300
+                        scale = 1.5 - 0.5 * (1 - Math.pow(1 - t, 3))
+                    }
+                }
+
                 // Draw animal image
                 if (p.img) {
                     ctx.save()
-                    // Flip image based on direction
+                    ctx.globalAlpha = p.alpha
+                    const w = 50 * scale
+                    const h = 50 * scale
+                    const ox = (w - 50) / 2
+                    const oy = (h - 50) / 2
                     if (p.dir < 0) {
-                        ctx.translate(p.x + 25, 0)
+                        ctx.translate(p.x + 25 + ox, 0)
                         ctx.scale(-1, 1)
-                        ctx.drawImage(p.img, 0, p.y - 10, 50, 50)
+                        ctx.drawImage(p.img, 0, p.y - 10 - oy, w, h)
                     } else {
-                        ctx.drawImage(p.img, p.x, p.y - 10, 50, 50)
+                        ctx.drawImage(p.img, p.x - ox, p.y - 10 - oy, w, h)
                     }
                     ctx.restore()
                 } else {
-                    // Fallback: draw colored circle with first letter
                     ctx.beginPath()
-                    ctx.arc(p.x + 25, p.y + 15, 20, 0, Math.PI * 2)
+                    ctx.arc(p.x + 25, p.y + 15, 20 * scale, 0, Math.PI * 2)
                     ctx.fillStyle = p.color
                     ctx.fill()
                     ctx.fillStyle = '#fff'
-                    ctx.font = 'bold 16px sans-serif'
+                    ctx.font = `bold ${16 * scale}px sans-serif`
                     ctx.textAlign = 'center'
                     ctx.textBaseline = 'middle'
                     ctx.fillText(p.animal[0].toUpperCase(), p.x + 25, p.y + 15)
@@ -254,21 +278,41 @@ function AnimalGame() {
     function spawnWalkingAnimal(animal) {
         const cvs = canvasRef.current
         if (!cvs) return
-        const sx = cvs.width / 2
-        const sy = 0
+        const rect = cvs.getBoundingClientRect()
+        const imgEl = document.querySelector('.animal-image')
+        let sx = cvs.width / 2
+        let sy = 0
+        if (imgEl) {
+            const ir = imgEl.getBoundingClientRect()
+            sx = ir.left + ir.width / 2 - rect.left
+            sy = ir.top - rect.top
+        }
+        const landX = 50 + Math.random() * (cvs.width - 100)
         const img = imageCacheRef.current[animal.url] || preloadImage(animal.url)
         walkingAnimalsRef.current.push({
             animal: animal.name,
             x: sx - 25,
             y: sy,
             targetY: cvs.height - 60,
+            landX: landX,
             dir: Math.random() < 0.5 ? 1 : -1,
             speed: 0.5 + Math.random() * 0.5,
             frame: 0,
             dropping: true,
+            spawnTime: performance.now(),
+            alpha: 1,
+            exiting: false,
             img: img,
             color: colors[Math.floor(Math.random() * colors.length)]
         })
+        // Cap at 10 walkers
+        while (walkingAnimalsRef.current.length > 10) {
+            const oldest = walkingAnimalsRef.current.find(w => !w.exiting)
+            if (oldest) {
+                oldest.exiting = true
+                oldest.exitDir = oldest.x < cvs.width / 2 ? -1 : 1
+            } else break
+        }
     }
 
     function srCorrect(name) {
@@ -417,16 +461,15 @@ function AnimalGame() {
                     Score: {score}
                 </div>
 
-                {/* Canvas for walking animals - positioned in a container below */}
+                {/* Canvas for walking animals - full-width strip at bottom */}
                 <div style={{
                     position: 'relative',
                     width: '100%',
-                    maxWidth: '500px',
+                    maxWidth: '100%',
                     height: '120px',
                     marginTop: '10px',
                     overflow: 'hidden',
-                    borderRadius: '8px',
-                    border: '1px solid var(--border)',
+                    borderTop: '1px solid var(--border)',
                     background: 'var(--accent-bg)'
                 }}>
                     <canvas
