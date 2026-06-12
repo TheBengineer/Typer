@@ -84,7 +84,6 @@ function AnimalGame() {
                 return
             }
             const img = new Image()
-            img.crossOrigin = 'anonymous'
             img.onload = () => {
                 imageCacheRef.current[a.url] = img
                 resolve(true)
@@ -160,7 +159,6 @@ function AnimalGame() {
             return
         }
         const img = new Image()
-        img.crossOrigin = 'anonymous'
         img.onload = () => {
             imageCacheRef.current[currentAnimal.url] = img
             setLoaded(true)
@@ -266,7 +264,6 @@ function AnimalGame() {
     function preloadImage(url) {
         if (imageCacheRef.current[url]) return imageCacheRef.current[url]
         const img = new Image()
-        img.crossOrigin = 'anonymous'
         img.onload = () => { imageCacheRef.current[url] = img }
         img.src = url
         imageCacheRef.current[url] = img
