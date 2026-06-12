@@ -1,7 +1,7 @@
 import {useState, useEffect, useRef} from 'react'
 import TabBar from './TabBar.jsx'
 import TypingGame from './TypingGame.jsx'
-import PlaceholderGame from './PlaceholderGame.jsx'
+import AnimalGame from './AnimalGame.jsx'
 import './App.css'
 
 function App() {
@@ -73,7 +73,7 @@ function App() {
                         setWrongKey={setWrongKey}
                     />
                 ) : (
-                    <PlaceholderGame />
+                    <AnimalGame />
                 )}
             </div>
             <section id="footer">
