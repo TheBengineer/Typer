@@ -24,7 +24,7 @@ function App() {
     useEffect(() => {
         const onHashChange = () => {
             const tab = window.location.hash.slice(1) || 'typing'
-            if (['typing', 'placeholder'].includes(tab)) {
+            if (['typing', 'animals'].includes(tab)) {
                 setActiveTab(tab)
             } else {
                 window.location.hash = ''
@@ -53,7 +53,7 @@ function App() {
             <TabBar
                 tabs={[
                     {id: 'typing', label: 'Typer'},
-                    {id: 'placeholder', label: 'Animals'}
+                    {id: 'animals', label: 'Animals'}
                 ]}
                 activeTab={activeTab}
                 onTabChange={handleTabChange}
