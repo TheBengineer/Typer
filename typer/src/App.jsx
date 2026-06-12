@@ -53,7 +53,7 @@ function App() {
             <TabBar
                 tabs={[
                     {id: 'typing', label: 'Typer'},
-                    {id: 'placeholder', label: 'Other Game'}
+                    {id: 'placeholder', label: 'Animals'}
                 ]}
                 activeTab={activeTab}
                 onTabChange={handleTabChange}
