@@ -185,6 +185,40 @@
 }
 
 
+/* Tab Bar */
+.tab-bar {
+    display: flex;
+    border-bottom: 2px solid var(--border);
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 12px 24px;
+    font-size: 18px;
+    font-weight: 600;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+    font-family: var(--heading);
+}
+
+.tab-btn:hover {
+    color: var(--text-h);
+    border-bottom-color: var(--border);
+}
+
+.tab-btn--active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
 #footer {
     position: absolute;
     bottom: 0;
