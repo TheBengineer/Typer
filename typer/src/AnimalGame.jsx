@@ -19,6 +19,8 @@ function AnimalGame() {
     const failedTimeoutRef = useRef(null)
     const colors = ['#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6','#1abc9c','#e67e22','#ff6b81']
     const imageCacheRef = useRef({})
+    const verifiedQueue = useRef([])
+    const BATCH_SIZE = 8
 
     const unlocked = animals.slice(0, unlockedCount)
 
@@ -70,8 +72,66 @@ function AnimalGame() {
         const animal = animals.find(a => a.name === (best || animals[0].name))
         setCurrentAnimal(animal || animals[0])
         animalShownAtRef.current = Date.now()
+
+        refillQueue(saved?.unlockedCount ?? 4)
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
+
+    function verifyAnimal(a) {
+        return new Promise((resolve) => {
+            if (imageCacheRef.current[a.url]) {
+                resolve(true)
+                return
+            }
+            const img = new Image()
+            img.crossOrigin = 'anonymous'
+            img.onload = () => {
+                imageCacheRef.current[a.url] = img
+                resolve(true)
+            }
+            img.onerror = () => resolve(false)
+            img.src = a.url
+        })
+    }
+
+    async function refillQueue(upTo) {
+        const limit = upTo ?? unlockedCount
+        const batch = animals.slice(0, limit)
+        const queuedUrls = new Set(verifiedQueue.current.map(a => a.url))
+        const unverified = batch.filter(a => !queuedUrls.has(a.url) && !verifiedQueue.current.some(v => v.url === a.url))
+
+        for (const a of unverified) {
+            if (verifiedQueue.current.length >= BATCH_SIZE) break
+            const ok = await verifyAnimal(a)
+            if (ok) {
+                verifiedQueue.current.push(a)
+            }
+        }
+    }
+
+    function pickNext() {
+        const pool = srRef.current
+        if (!pool) return animals[0]
+        if (verifiedQueue.current.length < 3) refillQueue()
+
+        const candidates = verifiedQueue.current
+        if (candidates.length === 0) {
+            return unlocked[0] || animals[0]
+        }
+        let best = null
+        let bestTime = Infinity
+        for (const a of candidates) {
+            const due = pool[a.name]?.nextDue ?? 0
+            if (due < bestTime) {
+                bestTime = due
+                best = a
+            }
+        }
+        const chosen = best || candidates[0]
+        verifiedQueue.current = verifiedQueue.current.filter(a => a !== chosen)
+        setTimeout(() => refillQueue(), 100)
+        return chosen
+    }
 
     // Save on score change
     useEffect(() => {
@@ -245,24 +305,10 @@ function AnimalGame() {
         })
         if (mastered && unlockedCount < animals.length) {
             const next = unlockedCount + 4
-            setUnlockedCount(Math.min(next, animals.length))
+            const newCount = Math.min(next, animals.length)
+            setUnlockedCount(newCount)
+            setTimeout(() => refillQueue(newCount), 50)
         }
-    }
-
-    function pickNext() {
-        const pool = srRef.current
-        if (!pool) return animals[0]
-        const candidateNames = unlocked.map(a => a.name)
-        let best = null
-        let bestTime = Infinity
-        for (const name of candidateNames) {
-            const due = pool[name]?.nextDue ?? 0
-            if (due < bestTime) {
-                bestTime = due
-                best = name
-            }
-        }
-        return animals.find(a => a.name === best) || animals[0]
     }
 
     const handleKeyDown = useCallback((e) => {
