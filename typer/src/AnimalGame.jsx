@@ -338,6 +338,7 @@ function AnimalGame() {
                 // Pick next animal
                 const next = pickNext()
                 setCurrentAnimal(next)
+                setTypedLetters('')
             }
         } else {
             srWrong(currentAnimal.name)
