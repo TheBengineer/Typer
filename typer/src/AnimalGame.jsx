@@ -239,6 +239,22 @@ function AnimalGame() {
                         ctx.drawImage(p.img, p.x - ox, p.y - 10 - oy, w, h)
                     }
                     ctx.restore()
+                    const legSwing = Math.sin(p.frame * 0.15) * 8
+                    const legColor = p.color
+                    ctx.save()
+                    ctx.globalAlpha = p.alpha
+                    ctx.strokeStyle = legColor
+                    ctx.lineWidth = Math.max(2, 2.5 * scale)
+                    ctx.lineCap = 'round'
+                    const legTop = p.y + 38 * scale - oy
+                    const legBot = p.y + 55 * scale - oy
+                    ctx.beginPath()
+                    ctx.moveTo(p.x + 25 - 5 * p.dir, legTop)
+                    ctx.lineTo(p.x + 25 - 5 * p.dir - legSwing * p.dir, legBot)
+                    ctx.moveTo(p.x + 25 + 5 * p.dir, legTop)
+                    ctx.lineTo(p.x + 25 + 5 * p.dir + legSwing * p.dir, legBot)
+                    ctx.stroke()
+                    ctx.restore()
                 } else {
                     ctx.beginPath()
                     ctx.arc(p.x + 25, p.y + 15, 20 * scale, 0, Math.PI * 2)
