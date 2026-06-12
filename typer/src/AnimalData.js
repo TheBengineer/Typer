@@ -1,5 +1,5 @@
 const animals = [
-    { name: 'ant         ', url: 'https://images2.pics4learning.com/catalog/a/ant.jpg' },
+    { name: 'ant', url: 'https://images2.pics4learning.com/catalog/a/ant.jpg' },
     { name: 'bee         ', url: 'https://images2.pics4learning.com/catalog/b/bee.jpg' },
     { name: 'cat         ', url: 'https://images2.pics4learning.com/catalog/c/cat.jpg' },
     { name: 'cow         ', url: 'https://images2.pics4learning.com/catalog/c/cow.jpg' },
