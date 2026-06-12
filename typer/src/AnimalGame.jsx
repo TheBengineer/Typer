@@ -180,10 +180,8 @@ function AnimalGame() {
         let animId
 
         function resize() {
-            const parent = cvs.parentElement
-            if (!parent) return
-            cvs.width = parent.clientWidth
-            cvs.height = parent.clientHeight
+            cvs.width = window.innerWidth
+            cvs.height = window.innerHeight
         }
         resize()
         window.addEventListener('resize', resize)
@@ -461,16 +459,15 @@ function AnimalGame() {
                     Score: {score}
                 </div>
 
-                {/* Canvas for walking animals - full-width strip at bottom */}
+                {/* Walking animals canvas - transparent overlay on entire page */}
                 <div style={{
-                    position: 'relative',
-                    width: '100%',
-                    maxWidth: '100%',
-                    height: '120px',
-                    marginTop: '10px',
-                    overflow: 'hidden',
-                    borderTop: '1px solid var(--border)',
-                    background: 'var(--accent-bg)'
+                    position: 'fixed',
+                    inset: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    pointerEvents: 'none',
+                    zIndex: 9999,
+                    background: 'transparent'
                 }}>
                     <canvas
                         ref={canvasRef}
