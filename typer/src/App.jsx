@@ -1,5 +1,7 @@
-import {useState, useEffect} from 'react'
+import {useState, useEffect, useRef} from 'react'
+import TabBar from './TabBar.jsx'
 import TypingGame from './TypingGame.jsx'
+import PlaceholderGame from './PlaceholderGame.jsx'
 import './App.css'
 
 function App() {
@@ -15,23 +17,65 @@ function App() {
     const [failed, setFailed] = useState(false)
     const [wrongKey, setWrongKey] = useState('')
 
+    const [activeTab, setActiveTab] = useState(() => {
+        return window.location.hash.slice(1) || 'typing'
+    })
+
+    useEffect(() => {
+        const onHashChange = () => {
+            const tab = window.location.hash.slice(1) || 'typing'
+            if (['typing', 'placeholder'].includes(tab)) {
+                setActiveTab(tab)
+            } else {
+                window.location.hash = ''
+            }
+        }
+        window.addEventListener('hashchange', onHashChange)
+        onHashChange()
+        return () => window.removeEventListener('hashchange', onHashChange)
+    }, [])
+
+    const handleTabChange = (tabId) => {
+        window.location.hash = tabId
+    }
+
+    const gameContainerRef = useRef(null)
+
+    useEffect(() => {
+        if (activeTab === 'typing' && gameContainerRef.current) {
+            const gameDiv = gameContainerRef.current.querySelector('[tabindex="0"]')
+            if (gameDiv) gameDiv.focus()
+        }
+    }, [activeTab])
+
     return (
         <>
-            <div className="hero">
-                <h1>Typer</h1>
-            </div>
-            <TypingGame
-                count={count}
-                setCount={setCount}
-                letter={letter}
-                setLetter={setLetter}
-                typedLetter={typedLetter}
-                setTypedLetter={setTypedLetter}
-                failed={failed}
-                setFailed={setFailed}
-                wrongKey={wrongKey}
-                setWrongKey={setWrongKey}
+            <TabBar
+                tabs={[
+                    {id: 'typing', label: 'Typer'},
+                    {id: 'placeholder', label: 'Other Game'}
+                ]}
+                activeTab={activeTab}
+                onTabChange={handleTabChange}
             />
+            <div ref={gameContainerRef}>
+                {activeTab === 'typing' ? (
+                    <TypingGame
+                        count={count}
+                        setCount={setCount}
+                        letter={letter}
+                        setLetter={setLetter}
+                        typedLetter={typedLetter}
+                        setTypedLetter={setTypedLetter}
+                        failed={failed}
+                        setFailed={setFailed}
+                        wrongKey={wrongKey}
+                        setWrongKey={setWrongKey}
+                    />
+                ) : (
+                    <PlaceholderGame />
+                )}
+            </div>
             <section id="footer">
                 <div>
                     <a href="https://github.com/thebengineer/typer" target="_blank" rel="noopener noreferrer">GitHub</a>
