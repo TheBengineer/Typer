@@ -282,7 +282,6 @@ function AnimalGame() {
         const img = new Image()
         img.onload = () => { imageCacheRef.current[url] = img }
         img.src = url
-        imageCacheRef.current[url] = img
         return img
     }
 
@@ -299,7 +298,8 @@ function AnimalGame() {
             sy = ir.top - rect.top
         }
         const landX = 50 + Math.random() * (cvs.width - 100)
-        const img = imageCacheRef.current[animal.url] || preloadImage(animal.url)
+        const cached = imageCacheRef.current[animal.url]
+        if (!cached || !cached.complete) return
         walkingAnimalsRef.current.push({
             animal: animal.name,
             x: sx - 25,
@@ -313,7 +313,7 @@ function AnimalGame() {
             spawnTime: performance.now(),
             alpha: 1,
             exiting: false,
-            img: img,
+            img: cached,
             color: colors[Math.floor(Math.random() * colors.length)]
         })
         // Cap at 10 walkers
