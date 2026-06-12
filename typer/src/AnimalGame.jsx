@@ -384,7 +384,7 @@ function AnimalGame() {
         }
         return (
             <span key={i} className={cls}>
-                {letter}
+                {letter.toUpperCase()}
             </span>
         )
     })
