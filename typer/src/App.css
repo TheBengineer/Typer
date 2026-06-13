@@ -281,12 +281,10 @@
     font-weight: bold;
     border-bottom: 3px solid transparent;
     transition: all 0.15s;
-    text-transform: lowercase;
 }
 
 .animal-letter--completed {
     color: var(--accent);
-    border-bottom-color: var(--accent);
 }
 
 .animal-letter--current {
