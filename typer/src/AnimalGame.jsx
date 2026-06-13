@@ -328,15 +328,15 @@ function AnimalGame() {
     }
 
     function tryUnlock() {
-        const mastered = unlocked.every(a => {
+        let masteredCount = 0
+        for (const a of unlocked) {
             const card = srRef.current[a.name]
-            return card && card.interval >= 1
-        })
-        if (mastered && unlockedCount < animals.length) {
-            const next = unlockedCount + 4
-            const newCount = Math.min(next, animals.length)
-            setUnlockedCount(newCount)
-            setTimeout(() => refillQueue(newCount), 50)
+            if (card && card.interval >= 1) masteredCount++
+        }
+        const needToUnlock = Math.min(unlockedCount + 8, animals.length)
+        if (masteredCount >= Math.min(unlockedCount, 3) && needToUnlock > unlockedCount) {
+            setUnlockedCount(needToUnlock)
+            setTimeout(() => refillQueue(needToUnlock), 50)
         }
     }
 
