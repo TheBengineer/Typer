@@ -2,7 +2,7 @@
 
 A typing practice game built with React and Vite.
 
-![Screenshot](../images/img.png)
+![Screenshot](images/img.png)
 
 ## Tabs
 
