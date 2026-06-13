@@ -304,7 +304,7 @@ function AnimalGame() {
         const card = srRef.current[name]
         if (!card) return
         const elapsed = Date.now() - (animalShownAtRef.current || Date.now())
-        if (elapsed > 5000) {
+        if (elapsed > 50000) {
             card.interval = 0
             card.ease = Math.max(1.3, card.ease - 0.1)
         } else if (card.interval === 0) {
