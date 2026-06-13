@@ -258,14 +258,6 @@ function AnimalGame() {
         }
     }, [currentAnimal])
 
-    function preloadImage(url) {
-        if (imageCacheRef.current[url]) return imageCacheRef.current[url]
-        const img = new Image()
-        img.onload = () => { imageCacheRef.current[url] = img }
-        img.src = url
-        return img
-    }
-
     function spawnWalkingAnimal(animal) {
         console.log("Spawning Animal")
         const cvs = canvasRef.current
@@ -299,12 +291,12 @@ function AnimalGame() {
             color: colors[Math.floor(Math.random() * colors.length)]
         })
         // Cap at 10 walkers
-        while (walkingAnimalsRef.current.length > 10) {
-            const oldest = walkingAnimalsRef.current.find(w => !w.exiting)
+        if (walkingAnimalsRef.current.length > 10) {
+            const oldest = walkingAnimalsRef.current.at(0)
             if (oldest) {
                 oldest.exiting = true
                 oldest.exitDir = oldest.x < cvs.width / 2 ? -1 : 1
-            } else break
+            }
         }
     }
 
