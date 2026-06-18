@@ -347,36 +347,20 @@
 }
 
 /* Labels row */
-.sg-pv-labels {
+/* Column wrapper — each magnitude gets its own column */
+.sg-pv-col {
     display: flex;
-    gap: 12px;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
 }
 
 .sg-pv-label {
     font-size: 10px;
     font-weight: 600;
     color: var(--text);
-    text-transform: uppercase;
     letter-spacing: 0.5px;
     text-align: center;
-    width: 100px;
-}
-
-.sg-pv-label:nth-child(2) {
-    width: 30px;
-}  /* Hundreds label */
-.sg-pv-label:last-child {
-    width: 30px;
-}  /* Ones label */
-
-/* Ones label */
-
-/* Digit values row */
-.sg-pv-digits {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
     margin-bottom: 2px;
 }
 
@@ -385,18 +369,8 @@
     font-weight: bold;
     color: var(--accent);
     text-align: center;
-    width: 100px;
-    transition: transform 0.2s;
+    margin-bottom: 4px;
 }
-
-.sg-pv-digit:nth-child(2) {
-    width: 30px;
-}  /* Hundreds digit */
-.sg-pv-digit:last-child {
-    width: 30px;
-}  /* Ones digit */
-
-/* Ones digit */
 
 /* Columns wrapper */
 .sg-pv-cols {
@@ -418,12 +392,8 @@
 }
 
 /* === Hundreds: row of 10 compressed blocks === */
-.sg-pv-hundreds {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.sg-pv-col-hundreds {
     width: 240px;
-    flex-shrink: 0;
 }
 
 .sg-pv-hundreds-row {
@@ -466,12 +436,8 @@
 }
 
 /* === Ones: column of 10 dots === */
-.sg-pv-ones {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.sg-pv-col-ones {
     width: 122px;
-    flex-shrink: 0;
 }
 
 /* Common dot styles */
@@ -499,12 +465,8 @@
 }
 
 /* === Tens: 10×10 grid === */
-.sg-pv-tens-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.sg-pv-col-tens {
     width: 100px;
-    flex-shrink: 0;
 }
 
 .sg-pv-tens {
@@ -542,7 +504,7 @@
 }
 
 /* Carry animation on ones column (when 9→10) */
-.sg-pv-ones--just-carried .sg-pv-dot--filled {
+.sg-pv-col-ones--just-carried .sg-pv-dot--filled {
     animation: pv-carry-flash 0.4s ease-out;
 }
 
@@ -610,50 +572,7 @@
 
 .game-container:focus:not(:focus-visible) {
     outline: none;
-}
-
-/* Thousands column */
-.sg-pv-thousands {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 240px;
-    flex-shrink: 0;
-}
-.sg-pv-thousands-row {
-    display: flex;
-    gap: 3px;
-}
-.sg-pv-thblock {
-    width: 20px;
-    height: 18px;
-    border-radius: 2px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 6px;
-    font-weight: 700;
-    transition: background 0.2s, border-color 0.2s, transform 0.2s;
-}
-.sg-pv-thblock--empty {
-    background: var(--bg);
-    border: 1.5px solid var(--border);
-    color: transparent;
-}
-.sg-pv-thblock--filled {
-    background: var(--accent-bg);
-    border: 2px solid var(--accent);
-    color: var(--accent);
-}
-.sg-pv-thblock--new {
-    animation: pv-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-    box-shadow: 0 0 6px var(--accent-border);
-}
-.sg-pv-thousands--just-carried {
-    animation: pv-grid-pulse 0.6s ease-out;
-}
-
-@media (prefers-reduced-motion: reduce) {
+}@media (prefers-reduced-motion: reduce) {
     .sg-pv-dot--new {
         animation: none;
     }
@@ -666,15 +585,7 @@
         animation: none;
     }
 
-    .sg-pv-ones--just-carried .sg-pv-dot--filled {
-        animation: none;
-    }
-
-    .sg-pv-thblock--new {
-        animation: none;
-    }
-
-    .sg-pv-thousands--just-carried {
+    .sg-pv-col-ones--just-carried .sg-pv-dot--filled {
         animation: none;
     }
 

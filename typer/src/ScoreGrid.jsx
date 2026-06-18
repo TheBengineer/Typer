@@ -6,7 +6,6 @@ function ScoreGrid({count}) {
 
     const onesJustCarried = count > 0 && count % 10 === 0
     const tensJustCarried = count > 0 && count % 100 === 0 && count % 1000 !== 0
-    const hundredsJustCarried = count > 0 && count % 1000 === 0
 
     return (
         <div
@@ -14,45 +13,17 @@ function ScoreGrid({count}) {
             role="img"
             aria-label={`Score: ${count}. ${thousands} thousands, ${hundreds} hundreds, ${tens} tens, ${ones} ones`}
         >
-            {/* Column labels */}
-            <div className="sg-pv-labels">
-                <span className="sg-pv-label">Thousands</span>
-                <span className="sg-pv-label">Hundreds</span>
-                <span className="sg-pv-label">Tens</span>
-                <span className="sg-pv-label">Ones</span>
-            </div>
-
-            {/* Digit values above each column */}
-            <div className="sg-pv-digits">
-                <span className="sg-pv-digit">{thousands}</span>
-                <span className="sg-pv-digit">{hundreds}</span>
-                <span className="sg-pv-digit">{tens}</span>
-                <span className="sg-pv-digit">{ones}</span>
-            </div>
-
             <div className="sg-pv-cols">
-                {/* === THOUSANDS: row of 10 blocks, each = 1000 === */}
-                <div className={`sg-pv-thousands${hundredsJustCarried ? ' sg-pv-thousands--just-carried' : ''}`}>
-                    <div className="sg-pv-col-label">each = 1000</div>
-                    <div className="sg-pv-thousands-row">
-                        {Array.from({length: 10}, (_, i) => (
-                            <div
-                                key={i}
-                                className={
-                                    'sg-pv-thblock' +
-                                    (i < thousands ? ' sg-pv-thblock--filled' : ' sg-pv-thblock--empty') +
-                                    (i === thousands - 1 && hundredsJustCarried ? ' sg-pv-thblock--new' : '')
-                                }
-                                aria-hidden="true"
-                            >
-                                {(i + 1) * 1000}
-                            </div>
-                        ))}
-                    </div>
+                {/* Thousands — digit only, no visual */}
+                <div className="sg-pv-col">
+                    <span className="sg-pv-label">Thousands</span>
+                    <span className="sg-pv-digit">{thousands}</span>
                 </div>
 
-                {/* === HUNDREDS: row of 10 compressed blocks, each = 100 === */}
-                <div className="sg-pv-hundreds">
+                {/* Hundreds — row of 10 blocks, each = 100 */}
+                <div className="sg-pv-col sg-pv-col-hundreds">
+                    <span className="sg-pv-label">Hundreds</span>
+                    <span className="sg-pv-digit">{hundreds}</span>
                     <div className="sg-pv-col-label">each = 100</div>
                     <div className="sg-pv-hundreds-row">
                         {Array.from({length: 10}, (_, i) => (
@@ -71,8 +42,10 @@ function ScoreGrid({count}) {
                     </div>
                 </div>
 
-                {/* === TENS: 10x10 grid, each row = 10 === */}
-                <div className="sg-pv-tens-wrap">
+                {/* Tens — 10x10 grid, each row = 10 */}
+                <div className="sg-pv-col sg-pv-col-tens">
+                    <span className="sg-pv-label">Tens</span>
+                    <span className="sg-pv-digit">{tens}</span>
                     <div className="sg-pv-col-label">x10</div>
                     <div className={`sg-pv-tens${tensJustCarried ? ' sg-pv-tens--just-carried' : ''}`}>
                         {Array.from({length: 100}, (_, i) => {
@@ -93,8 +66,10 @@ function ScoreGrid({count}) {
                     </div>
                 </div>
 
-                {/* === ONES: column of 10, each dot = 1 === */}
-                <div className={`sg-pv-ones${onesJustCarried ? ' sg-pv-ones--just-carried' : ''}`}>
+                {/* Ones — column of 10, each dot = 1 */}
+                <div className={`sg-pv-col sg-pv-col-ones${onesJustCarried ? ' sg-pv-col-ones--just-carried' : ''}`}>
+                    <span className="sg-pv-label">Ones</span>
+                    <span className="sg-pv-digit">{ones}</span>
                     <div className="sg-pv-col-label">x1</div>
                     <div className="sg-pv-ones-row">
                         {Array.from({length: 10}, (_, i) => {
